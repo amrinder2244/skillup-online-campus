@@ -46,9 +46,16 @@ const Header = () => {
                     <Button variant="ghost">Instructor Dashboard</Button>
                   </Link>
                 )}
-                <Link to="/my-courses">
-                  <Button variant="ghost">My Courses</Button>
-                </Link>
+                {user.role === 'admin' && (
+                  <Link to="/admin/dashboard">
+                    <Button variant="ghost">Admin Dashboard</Button>
+                  </Link>
+                )}
+                {user.role === 'student' && (
+                  <Link to="/my-courses">
+                    <Button variant="ghost">My Learning</Button>
+                  </Link>
+                )}
                 <div className="flex items-center space-x-2">
                   <User className="h-6 w-6 text-gray-600" />
                   <span className="text-sm text-gray-700">{user.name}</span>
