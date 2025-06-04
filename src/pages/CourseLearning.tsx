@@ -5,7 +5,9 @@ import Header from '@/components/layout/Header';
 import VideoPlayer from '@/components/course/VideoPlayer';
 import CourseProgress from '@/components/course/CourseProgress';
 import CertificateDownload from '@/components/course/CertificateDownload';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
+import { CheckCircle } from 'lucide-react';
 
 interface Lesson {
   id: string;
@@ -69,8 +71,16 @@ const CourseLearning = () => {
     ));
   };
 
+  const handleMarkCurrentLessonComplete = () => {
+    const currentLesson = lessons[currentLessonIndex];
+    if (currentLesson && !currentLesson.completed) {
+      handleLessonComplete(currentLesson.id);
+    }
+  };
+
   const completedLessons = lessons.filter(lesson => lesson.completed).length;
   const isCoursCompleted = completedLessons === lessons.length && lessons.length > 0;
+  const currentLesson = lessons[currentLessonIndex];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,6 +96,19 @@ const CourseLearning = () => {
             showDetails={true}
           />
         </div>
+
+        {/* Progress Button */}
+        {currentLesson && !currentLesson.completed && (
+          <div className="mb-6">
+            <Button 
+              onClick={handleMarkCurrentLessonComplete}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Mark Lesson as Complete
+            </Button>
+          </div>
+        )}
 
         {/* Certificate Download Section */}
         {isCoursCompleted && (
