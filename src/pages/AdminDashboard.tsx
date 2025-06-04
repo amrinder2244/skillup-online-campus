@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,7 @@ interface CourseStats {
 }
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [courses, setCourses] = useState<CourseStats[]>([]);
   const [stats, setStats] = useState({
@@ -125,6 +126,26 @@ const AdminDashboard = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
           <p className="text-gray-600">Platform overview and management</p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          <Button 
+            onClick={() => navigate('/admin/students')}
+            className="h-16 text-lg"
+            variant="outline"
+          >
+            <Users className="h-6 w-6 mr-2" />
+            View All Students
+          </Button>
+          <Button 
+            onClick={() => navigate('/admin/teachers')}
+            className="h-16 text-lg"
+            variant="outline"
+          >
+            <Users className="h-6 w-6 mr-2" />
+            View All Teachers
+          </Button>
         </div>
 
         {/* Stats Cards */}

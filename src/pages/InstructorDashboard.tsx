@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Edit, Trash2, DollarSign, Users, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, DollarSign, Users, Star, Upload } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Course } from '@/components/course/CourseCard';
 
@@ -19,7 +18,8 @@ const InstructorDashboard = () => {
     description: '',
     price: 0,
     category: '',
-    level: 'Beginner' as 'Beginner' | 'Intermediate' | 'Advanced'
+    level: 'Beginner' as 'Beginner' | 'Intermediate' | 'Advanced',
+    videoFile: null as File | null
   });
 
   useEffect(() => {
@@ -66,7 +66,7 @@ const InstructorDashboard = () => {
       setCourses([...courses, newCourse]);
     }
 
-    setFormData({ title: '', description: '', price: 0, category: '', level: 'Beginner' });
+    setFormData({ title: '', description: '', price: 0, category: '', level: 'Beginner', videoFile: null });
     setShowCreateForm(false);
   };
 
@@ -76,7 +76,8 @@ const InstructorDashboard = () => {
       description: course.description,
       price: course.price,
       category: course.category,
-      level: course.level
+      level: course.level,
+      videoFile: null
     });
     setEditingCourse(course);
     setShowCreateForm(true);
@@ -84,6 +85,13 @@ const InstructorDashboard = () => {
 
   const handleDelete = (courseId: string) => {
     setCourses(courses.filter(c => c.id !== courseId));
+  };
+
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, videoFile: file });
+    }
   };
 
   const totalEarnings = courses.reduce((sum, course) => sum + (course.price * course.students), 0);
@@ -201,6 +209,37 @@ const InstructorDashboard = () => {
                     </select>
                   </div>
                 </div>
+                
+                {/* Video Upload Section */}
+                <div>
+                  <Label htmlFor="video">Course Video</Label>
+                  <div className="mt-2">
+                    <div className="flex items-center justify-center w-full">
+                      <label htmlFor="video-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                          <Upload className="w-8 h-8 mb-4 text-gray-500" />
+                          <p className="mb-2 text-sm text-gray-500">
+                            <span className="font-semibold">Click to upload</span> course video
+                          </p>
+                          <p className="text-xs text-gray-500">MP4, AVI, MOV (MAX. 500MB)</p>
+                          {formData.videoFile && (
+                            <p className="text-xs text-green-600 mt-2">
+                              Selected: {formData.videoFile.name}
+                            </p>
+                          )}
+                        </div>
+                        <input 
+                          id="video-upload" 
+                          type="file" 
+                          className="hidden" 
+                          accept="video/*"
+                          onChange={handleVideoUpload}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex space-x-4">
                   <Button type="submit">
                     {editingCourse ? 'Update Course' : 'Create Course'}
@@ -211,7 +250,7 @@ const InstructorDashboard = () => {
                     onClick={() => {
                       setShowCreateForm(false);
                       setEditingCourse(null);
-                      setFormData({ title: '', description: '', price: 0, category: '', level: 'Beginner' });
+                      setFormData({ title: '', description: '', price: 0, category: '', level: 'Beginner', videoFile: null });
                     }}
                   >
                     Cancel
