@@ -34,8 +34,8 @@ const Register = () => {
     }
 
     try {
-      await register(formData.name, formData.email, formData.password, formData.role);
-      navigate('/');
+      // Instead of directly registering, navigate to OTP verification
+      navigate('/verify-otp', { state: { email: formData.email, userData: formData } });
     } catch (err) {
       setError('Registration failed. Please try again.');
     } finally {

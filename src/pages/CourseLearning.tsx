@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import VideoPlayer from '@/components/course/VideoPlayer';
+import CourseProgress from '@/components/course/CourseProgress';
+import CertificateDownload from '@/components/course/CertificateDownload';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Lesson {
   id: string;
@@ -14,6 +17,7 @@ interface Lesson {
 
 const CourseLearning = () => {
   const { courseId } = useParams();
+  const { user } = useAuth();
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
 
@@ -66,28 +70,35 @@ const CourseLearning = () => {
   };
 
   const completedLessons = lessons.filter(lesson => lesson.completed).length;
-  const progressPercentage = (completedLessons / lessons.length) * 100;
+  const isCoursCompleted = completedLessons === lessons.length && lessons.length > 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Course Progress */}
+        {/* Course Header with Progress */}
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <h1 className="text-2xl font-bold text-gray-900">Complete React Developer Course</h1>
-            <span className="text-sm text-gray-600">
-              {completedLessons} of {lessons.length} lessons completed
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-green-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progressPercentage}%` }}
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Complete React Developer Course</h1>
+          <CourseProgress 
+            completed={completedLessons} 
+            total={lessons.length}
+            showDetails={true}
+          />
+        </div>
+
+        {/* Certificate Download Section */}
+        {isCoursCompleted && (
+          <div className="mb-6">
+            <CertificateDownload
+              courseTitle="Complete React Developer Course"
+              instructorName="John Doe"
+              completionDate={new Date().toLocaleDateString()}
+              studentName={user?.name || 'Student'}
+              isVisible={true}
             />
           </div>
-        </div>
+        )}
 
         {/* Video Player */}
         <VideoPlayer

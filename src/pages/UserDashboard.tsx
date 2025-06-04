@@ -1,21 +1,26 @@
-
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import CourseCard, { Course } from '@/components/course/CourseCard';
+import CourseProgress from '@/components/course/CourseProgress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BookOpen, Clock, Award, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
+interface CourseWithProgress extends Course {
+  completedLessons: number;
+  totalLessons: number;
+}
+
 const UserDashboard = () => {
   const { user } = useAuth();
-  const [enrolledCourses, setEnrolledCourses] = useState<Course[]>([]);
+  const [enrolledCourses, setEnrolledCourses] = useState<CourseWithProgress[]>([]);
   const [wishlistCourses, setWishlistCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-    // Mock enrolled courses data
-    const mockEnrolledCourses: Course[] = [
+    // Mock enrolled courses data with progress
+    const mockEnrolledCourses: CourseWithProgress[] = [
       {
         id: '1',
         title: 'Complete React Developer Course',
@@ -28,7 +33,9 @@ const UserDashboard = () => {
         image: '/placeholder.svg',
         category: 'Web Development',
         level: 'Intermediate',
-        isEnrolled: true
+        isEnrolled: true,
+        completedLessons: 3,
+        totalLessons: 5
       },
       {
         id: '2',
@@ -42,10 +49,13 @@ const UserDashboard = () => {
         image: '/placeholder.svg',
         category: 'Programming',
         level: 'Beginner',
-        isEnrolled: true
+        isEnrolled: true,
+        completedLessons: 10,
+        totalLessons: 10
       }
     ];
 
+    // Mock wishlist courses data
     const mockWishlistCourses: Course[] = [
       {
         id: '3',
@@ -68,9 +78,11 @@ const UserDashboard = () => {
   }, []);
 
   const totalCourses = enrolledCourses.length;
-  const completedCourses = 1; // Mock data
+  const completedCourses = enrolledCourses.filter(course => 
+    course.completedLessons === course.totalLessons
+  ).length;
   const totalHours = enrolledCourses.reduce((sum, course) => sum + parseInt(course.duration), 0);
-  const certificates = 1; // Mock data
+  const certificates = completedCourses; // Certificates equal completed courses
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -144,7 +156,14 @@ const UserDashboard = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {enrolledCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
+              <div key={course.id} className="space-y-3">
+                <CourseCard course={course} />
+                <CourseProgress 
+                  completed={course.completedLessons} 
+                  total={course.totalLessons}
+                  showDetails={true}
+                />
+              </div>
             ))}
           </div>
         </section>
