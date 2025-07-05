@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/layout/Header';
 import CourseCard, { Course } from '@/components/course/CourseCard';
 import { Button } from '@/components/ui/button';
@@ -192,7 +192,7 @@ const Home = () => {
               <p className="text-gray-600">Trending courses loved by our community</p>
             </div>
             <Button variant="outline" className="bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 hover:from-purple-700 hover:to-blue-700 rounded-full px-8">
-              View All Courses
+              <Link to="/courses">View All Courses</Link>
             </Button>
           </div>
           
