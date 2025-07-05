@@ -4,7 +4,9 @@ import CourseCard, { Course } from '@/components/course/CourseCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Search, Filter, Grid2X2, List, Star, Clock, User, BookOpen } from 'lucide-react';
 
 const AllCourses = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -12,7 +14,9 @@ const AllCourses = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
+  const [priceFilter, setPriceFilter] = useState('all');
   const [sortBy, setSortBy] = useState('popularity');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     // Extended mock data with more courses
@@ -20,7 +24,7 @@ const AllCourses = () => {
       {
         id: '1',
         title: 'Complete React Developer Course',
-        description: 'Learn React from scratch and build amazing web applications',
+        description: 'Learn React from scratch and build amazing web applications. This comprehensive course covers everything from basic concepts to advanced patterns including hooks, context, and state management.',
         instructor: 'John Doe',
         price: 89.99,
         originalPrice: 149.99,
@@ -34,7 +38,7 @@ const AllCourses = () => {
       {
         id: '2',
         title: 'Python for Beginners',
-        description: 'Master Python programming from basics to advanced concepts',
+        description: 'Master Python programming from basics to advanced concepts. Perfect for complete beginners who want to start their programming journey.',
         instructor: 'Jane Smith',
         price: 0,
         rating: 4.6,
@@ -140,7 +144,11 @@ const AllCourses = () => {
       const matchesCategory = selectedCategory === 'all' || course.category === selectedCategory;
       const matchesLevel = selectedLevel === 'all' || course.level === selectedLevel;
       
-      return matchesSearch && matchesCategory && matchesLevel;
+      const matchesPrice = priceFilter === 'all' || 
+                          (priceFilter === 'free' && course.price === 0) ||
+                          (priceFilter === 'paid' && course.price > 0);
+      
+      return matchesSearch && matchesCategory && matchesLevel && matchesPrice;
     });
 
     // Sort courses
@@ -162,10 +170,80 @@ const AllCourses = () => {
     }
 
     setFilteredCourses(filtered);
-  }, [courses, searchTerm, selectedCategory, selectedLevel, sortBy]);
+  }, [courses, searchTerm, selectedCategory, selectedLevel, priceFilter, sortBy]);
 
   const categories = ['all', 'Web Development', 'Programming', 'Design', 'Backend Development', 'Data Science', 'Mobile Development'];
   const levels = ['all', 'Beginner', 'Intermediate', 'Advanced'];
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setSelectedCategory('all');
+    setSelectedLevel('all');
+    setPriceFilter('all');
+    setSortBy('popularity');
+  };
+
+  const CourseListItem = ({ course }: { course: Course }) => (
+    <div className="bg-white rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow duration-300">
+      <div className="flex flex-col md:flex-row gap-6">
+        <div className="relative md:w-64 h-48 md:h-32 flex-shrink-0">
+          <img
+            src={course.image}
+            alt={course.title}
+            className="w-full h-full object-cover rounded-lg"
+          />
+          <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+            {course.level}
+          </div>
+        </div>
+        
+        <div className="flex-1">
+          <div className="flex justify-between items-start mb-2">
+            <h3 className="font-semibold text-xl text-gray-900 hover:text-blue-600 cursor-pointer">
+              {course.title}
+            </h3>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-gray-900">
+                ${course.price === 0 ? 'Free' : course.price}
+              </div>
+              {course.originalPrice && course.price > 0 && (
+                <div className="text-sm text-gray-500 line-through">
+                  ${course.originalPrice}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <p className="text-gray-600 mb-4 line-clamp-2">{course.description}</p>
+          
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4 text-sm text-gray-600">
+              <div className="flex items-center">
+                <User className="h-4 w-4 mr-1" />
+                <span>{course.instructor}</span>
+              </div>
+              <div className="flex items-center">
+                <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                <span>{course.rating}</span>
+              </div>
+              <div className="flex items-center">
+                <Clock className="h-4 w-4 mr-1" />
+                <span>{course.duration}</span>
+              </div>
+              <div className="flex items-center">
+                <BookOpen className="h-4 w-4 mr-1" />
+                <span>{course.students} students</span>
+              </div>
+            </div>
+            
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+              {course.price === 0 ? 'Enroll Now' : 'View Course'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -180,7 +258,7 @@ const AllCourses = () => {
 
         {/* Search and Filters */}
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4 items-center">
+          <div className="flex flex-col lg:flex-row gap-4 items-center mb-4">
             {/* Search */}
             <div className="relative flex-1 w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -193,70 +271,141 @@ const AllCourses = () => {
               />
             </div>
 
-            {/* Filters */}
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex items-center space-x-2">
-                <Filter className="h-4 w-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">Filter by:</span>
-              </div>
-              
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category === 'all' ? 'All Categories' : category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Level" />
-                </SelectTrigger>
-                <SelectContent>
-                  {levels.map(level => (
-                    <SelectItem key={level} value={level}>
-                      {level === 'all' ? 'All Levels' : level}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="popularity">Most Popular</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="newest">Newest</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* View Toggle */}
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="rounded-md"
+              >
+                <Grid2X2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="rounded-md"
+              >
+                <List className="h-4 w-4" />
+              </Button>
             </div>
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-wrap gap-4 items-center">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">Filter by:</span>
+            </div>
+            
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(category => (
+                  <SelectItem key={category} value={category}>
+                    {category === 'all' ? 'All Categories' : category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Level" />
+              </SelectTrigger>
+              <SelectContent>
+                {levels.map(level => (
+                  <SelectItem key={level} value={level}>
+                    {level === 'all' ? 'All Levels' : level}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={priceFilter} onValueChange={setPriceFilter}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Price" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Prices</SelectItem>
+                <SelectItem value="free">Free</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="popularity">Most Popular</SelectItem>
+                <SelectItem value="rating">Highest Rated</SelectItem>
+                <SelectItem value="price-low">Price: Low to High</SelectItem>
+                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="newest">Newest</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button variant="outline" onClick={clearAllFilters} size="sm">
+              Clear Filters
+            </Button>
+          </div>
+
+          {/* Applied Filters */}
+          <div className="flex flex-wrap gap-2 mt-4">
+            {searchTerm && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Search: {searchTerm}
+                <button onClick={() => setSearchTerm('')} className="ml-1 hover:bg-gray-300 rounded-full w-4 h-4 flex items-center justify-center text-xs">×</button>
+              </Badge>
+            )}
+            {selectedCategory !== 'all' && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Category: {selectedCategory}
+                <button onClick={() => setSelectedCategory('all')} className="ml-1 hover:bg-gray-300 rounded-full w-4 h-4 flex items-center justify-center text-xs">×</button>
+              </Badge>
+            )}
+            {selectedLevel !== 'all' && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Level: {selectedLevel}
+                <button onClick={() => setSelectedLevel('all')} className="ml-1 hover:bg-gray-300 rounded-full w-4 h-4 flex items-center justify-center text-xs">×</button>
+              </Badge>
+            )}
+            {priceFilter !== 'all' && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                Price: {priceFilter === 'free' ? 'Free' : 'Paid'}
+                <button onClick={() => setPriceFilter('all')} className="ml-1 hover:bg-gray-300 rounded-full w-4 h-4 flex items-center justify-center text-xs">×</button>
+              </Badge>
+            )}
           </div>
         </div>
 
         {/* Results Count */}
-        <div className="mb-6">
+        <div className="mb-6 flex justify-between items-center">
           <p className="text-gray-600">
             Showing {filteredCourses.length} of {courses.length} courses
           </p>
         </div>
 
-        {/* Course Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredCourses.map((course) => (
-            <div key={course.id} className="transform hover:scale-105 transition-transform duration-300">
-              <CourseCard course={course} />
-            </div>
-          ))}
-        </div>
+        {/* Course Display */}
+        {viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredCourses.map((course) => (
+              <div key={course.id} className="transform hover:scale-105 transition-transform duration-300">
+                <CourseCard course={course} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {filteredCourses.map((course) => (
+              <CourseListItem key={course.id} course={course} />
+            ))}
+          </div>
+        )}
 
         {/* No Results */}
         {filteredCourses.length === 0 && (
@@ -269,11 +418,7 @@ const AllCourses = () => {
               <p className="text-gray-600 mb-6">
                 Try adjusting your search criteria or browse all available courses.
               </p>
-              <Button onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('all');
-                setSelectedLevel('all');
-              }}>
+              <Button onClick={clearAllFilters}>
                 Clear All Filters
               </Button>
             </div>
